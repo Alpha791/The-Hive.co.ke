@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>TheHive - Modern Marketplace (Firebase Edition)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Firebase SDK (Compat version for easier migration) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-family: system-ui, -apple-system, sans-serif; }
+        .glass-card { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-radius: 24px; transition: all 0.3s ease; }
+        .glass-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .product-card { background: white; border-radius: 20px; overflow: hidden; transition: all 0.3s; }
+        .product-card:hover { transform: scale(1.02); box-shadow: 0 10px 40px rgba(0,0,0,0.15); }
+        .mobile-menu { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-radius: 20px 20px 0 0; z-index: 1000; display: flex; justify-content: space-around; padding: 12px 20px; }
+        .desktop-nav { display: flex; gap: 12px; }
+        @media (max-width: 768px) { .desktop-nav { display: none; } }
+        @media (min-width: 769px) { .mobile-menu { display: none; } }
+        .video-wrapper { border-radius: 20px; overflow: hidden; background: #000; height: 300px; }
+        video { width: 100%; height: 100%; object-fit: cover; }
+        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); color: white; padding: 10px 20px; border-radius: 50px; z-index: 2000; font-size: 14px; white-space: nowrap; }
+    </style>
+</head>
+<body>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="glass-card p-4 mb-6">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-gradient-to-r from-purple-600 to-pink-600 p-2 rounded-xl"><i class="fas fa-rocket text-white text-2xl"></i></div>
+                    <h1 class="text-2xl font-bold text-gray-800">TheHive<span class="text-purple-600">Kenya</span></h1>
+                </div>
+                <div class="desktop-nav">
+                    <button id="homeBtn" class="px-5 py-2 rounded-full font-semibold bg-purple-600 text-white"><i class="fas fa-home"></i> Home</button>
+                    <button id="marketBtn" class="px-5 py-2 rounded-full font-semibold bg-gray-200 text-gray-700"><i class="fas fa-store"></i> Market</button>
+                    <button id="sellBtn" class="px-5 py-2 rounded-full font-semibold bg-gray-200 text-gray-700 seller-only"><i class="fas fa-chalkboard-user"></i> Sell Live</button>
+                    <button id="profileBtn" class="px-5 py-2 rounded-full font-semibold bg-gray-200 text-gray-700"><i class="fas fa-user"></i> Profile</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Home Page -->
+        <div id="homePage" class="space-y-6">
+            <div class="glass-card p-8 text-center">
+                <h2 class="text-4xl font-bold text-gray-800 mb-3">Welcome to TheHive Kenya</h2>
+                <p class="text-gray-600 text-lg">Africa's fastest growing marketplace with live video selling</p>
+                <div class="mt-6 flex justify-center space-x-4">
+                    <button class="bg-purple-600 text-white px-6 py-2 rounded-full font-semibold exploreBtn"><i class="fas fa-shopping-cart"></i> Explore Products</button>
+                    <button class="bg-pink-600 text-white px-6 py-2 rounded-full font-semibold startSellingBtn seller-only"><i class="fas fa-video"></i> Start Selling Live</button>
+                </div>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="glass-card p-6 text-center"><i class="fas fa-users text-4xl text-purple-600 mb-3"></i><h3 class="text-xl font-bold">500+ Sellers</h3><p class="text-gray-600">Trusted vendors across Kenya</p></div>
+                <div class="glass-card p-6 text-center"><i class="fas fa-video text-4xl text-pink-600 mb-3"></i><h3 class="text-xl font-bold">Live Selling</h3><p class="text-gray-600">Real-time product demos</p></div>
+                <div class="glass-card p-6 text-center"><i class="fas fa-mobile-alt text-4xl text-green-600 mb-3"></i><h3 class="text-xl font-bold">Mobile Ready</h3><p class="text-gray-600">Front & back camera support</p></div>
+            </div>
+        </div>
+
+        <!-- Market Page -->
+        <div id="marketPage" class="hidden">
+            <div class="glass-card p-6 mb-6">
+                <div class="flex flex-wrap gap-4 justify-between items-center">
+                    <h2 class="text-2xl font-bold">Marketplace</h2>
+                    <div class="relative"><i class="fas fa-search absolute left-3 top-3 text-gray-400"></i><input type="text" id="searchInput" placeholder="Search products..." class="pl-10 pr-4 py-2 border rounded-full w-64"></div>
+                </div>
+            </div>
+            <div id="productsContainer" class="grid md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+        </div>
+
+        <!-- Live Page (Sellers only) -->
+        <div id="livePage" class="hidden">
+            <div class="glass-card p-6">
+                <div class="text-center mb-6"><h2 class="text-2xl font-bold">Live Video Studio</h2><p class="text-gray-600">Connect with buyers in real-time</p></div>
+                <div id="authRequired" class="text-center p-8">
+                    <i class="fas fa-lock text-5xl text-gray-400 mb-3"></i>
+                    <p class="text-gray-600 mb-4">Please login as a seller to start live selling</p>
+                    <button id="gotoAuthBtn" class="bg-purple-600 text-white px-6 py-2 rounded-full"><i class="fas fa-sign-in-alt"></i> Login / Register</button>
+                </div>
+                <div id="liveStudio" class="hidden">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <div class="video-wrapper"><video id="localVideo" autoplay playsinline muted class="w-full h-full"></video></div>
+                            <div class="flex gap-3 mt-4 justify-center">
+                                <button id="switchCamBtn" class="bg-gray-800 text-white px-4 py-2 rounded-full"><i class="fas fa-sync-alt"></i> Switch Camera</button>
+                                <button id="startLiveBtn" class="bg-red-600 text-white px-6 py-2 rounded-full font-bold"><i class="fas fa-circle"></i> Start Live</button>
+                                <button id="stopLiveBtn" class="bg-gray-600 text-white px-6 py-2 rounded-full font-bold hidden"><i class="fas fa-stop"></i> Stop Live</button>
+                            </div>
+                            <p class="text-sm text-gray-500 text-center mt-3"><i class="fas fa-info-circle"></i> Toggle between front/back camera for product display</p>
+                        </div>
+                        <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-5 rounded-xl">
+                            <h3 class="font-bold text-lg mb-3">Live Tips</h3>
+                            <ul class="space-y-2 text-sm"><li><i class="fas fa-check-circle text-green-600"></i> Switch to back camera to show product details</li><li><i class="fas fa-check-circle text-green-600"></i> Share your M-Pesa number in chat</li><li><i class="fas fa-check-circle text-green-600"></i> Engage with viewers in real-time</li></ul>
+                            <div id="liveStatus" class="mt-4 p-3 bg-gray-800 text-white rounded-lg text-center"><span id="liveStatusText">⚫ Offline</span></div>
+                        </div>
+                    </div>
+                    <div id="activeBroadcast" class="mt-6 hidden"><div class="bg-green-100 border border-green-400 p-3 rounded-lg text-center"><i class="fas fa-broadcast-tower text-red-600"></i> You are LIVE! Buyers can see you now</div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Page -->
+        <div id="profilePage" class="hidden">
+            <div class="glass-card p-6">
+                <h2 class="text-2xl font-bold mb-6">Account</h2>
+                <div id="profileLoggedOut" class="text-center p-8">
+                    <i class="fas fa-user-circle text-6xl text-gray-400 mb-4"></i>
+                    <button id="showLoginModalBtn" class="bg-purple-600 text-white px-6 py-2 rounded-full"><i class="fas fa-sign-in-alt"></i> Login</button>
+                    <button id="showRegisterModalBtn" class="bg-green-600 text-white px-6 py-2 rounded-full ml-3"><i class="fas fa-user-plus"></i> Register</button>
+                </div>
+                <div id="profileLoggedIn" class="hidden">
+                    <div class="text-center">
+                        <i class="fas fa-store text-6xl text-purple-600 mb-3"></i>
+                        <h3 id="userStoreName" class="text-xl font-bold"></h3>
+                        <p id="userFullName" class="text-gray-600"></p>
+                        <p id="userMobile" class="text-gray-500 mt-2"><i class="fas fa-phone"></i> <span></span></p>
+                        <p id="userRole" class="text-sm text-purple-600 font-semibold mt-1"></p>
+                        <button id="logoutBtn" class="mt-4 bg-red-500 text-white px-4 py-2 rounded-full"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                    </div>
+                    <div id="sellerPanel" class="mt-6 hidden">
+                        <h3 class="font-bold text-lg mb-3">My Products (Seller)</h3>
+                        <div id="myProductsList" class="space-y-3 max-h-96 overflow-y-auto"></div>
+                        <button id="showAddProductForm" class="mt-4 bg-green-600 text-white px-4 py-2 rounded-full w-full"><i class="fas fa-plus"></i> Add New Product</button>
+                    </div>
+                    <div id="buyerPanel" class="mt-6 hidden">
+                        <h3 class="font-bold text-lg mb-3">My Watchlist</h3>
+                        <p class="text-gray-500 text-center">Coming soon: Save your favourite products</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mobile-menu">
+        <button class="mobile-home text-purple-600"><i class="fas fa-home text-2xl"></i></button>
+        <button class="mobile-market"><i class="fas fa-store text-2xl text-gray-500"></i></button>
+        <button class="mobile-live seller-only"><i class="fas fa-video text-2xl text-gray-500"></i></button>
+        <button class="mobile-profile"><i class="fas fa-user text-2xl text-gray-500"></i></button>
+    </div>
+
+    <script>
+        // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDBVNHvRHyPd5g7wC-5ivadmSdUqZhJnws",
+  authDomain: "hive-e919c.firebaseapp.com",
+  projectId: "hive-e919c",
+  storageBucket: "hive-e919c.firebasestorage.app",
+  messagingSenderId: "630469771750",
+  appId: "1:630469771750:web:4caa2b65798db950ce5627",
+  measurementId: "G-21WMW956FT"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        // Global state
+        let currentUser = null;      // { id, email, role, store_name, full_name, mobile }
+        let currentRole = null;
+        let products = [];
+        let liveStream = null;
+        let currentCamera = 'user';
+        let activeLiveSessionId = null;   // track live session doc ID
+        
+        // Helper: toast notifications
+        function showToast(msg) {
+            let toast = document.querySelector('.toast');
+            if(toast) toast.remove();
+            toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerText = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+        
+        function showPage(page) {
+            document.getElementById('homePage').classList.add('hidden');
+            document.getElementById('marketPage').classList.add('hidden');
+            document.getElementById('livePage').classList.add('hidden');
+            document.getElementById('profilePage').classList.add('hidden');
+            document.getElementById(`${page}Page`).classList.remove('hidden');
+        }
+        
+        // Hide seller-only UI for buyers
+        function updateUIBasedOnRole() {
+            const sellerOnlyElements = document.querySelectorAll('.seller-only');
+            if(currentRole === 'seller') {
+                sellerOnlyElements.forEach(el => el.classList.remove('hidden'));
+            } else {
+                sellerOnlyElements.forEach(el => el.classList.add('hidden'));
+            }
+        }
+        
+        // Escape HTML
+        function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
+        
+        // ------------------------- PRODUCTS & SELLER LOGIC -------------------------
+        async function loadProducts() {
+            try {
+                // 1. Fetch all products
+                const productsSnapshot = await db.collection('products').get();
+                const productsList = [];
+                productsSnapshot.forEach(doc => {
+                    productsList.push({ id: doc.id, ...doc.data() });
+                });
+                // 2. Fetch all sellers to build a map for store names & contact
+                const sellersSnapshot = await db.collection('sellers').get();
+                const sellerMap = {};
+                sellersSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    sellerMap[doc.id] = {
+                        store_name: data.store_name || 'Unknown Store',
+                        full_name: data.full_name || 'Seller',
+                        mobile: data.mobile || ''
+                    };
+                });
+                // 3. Attach seller info to each product
+                products = productsList.map(p => ({
+                    ...p,
+                    sellers: sellerMap[p.sellerId] || { store_name: 'Deleted Seller', full_name: '', mobile: '' }
+                }));
+                renderProducts();
+            } catch(err) {
+                console.error(err);
+                showToast('Error loading products');
+            }
+        }
+        
+        function renderProducts() {
+            const container = document.getElementById('productsContainer');
+            const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
+            const filtered = products.filter(p => p.name?.toLowerCase().includes(searchTerm) || p.description?.toLowerCase().includes(searchTerm));
+            if(filtered.length === 0) { container.innerHTML = '<div class="col-span-full text-center py-10"><i class="fas fa-box-open text-4xl text-gray-400"></i><p class="text-gray-500">No products found</p></div>'; return; }
+            container.innerHTML = filtered.map(p => `
+                <div class="product-card p-4">
+                    <img src="${p.image_url || 'https://picsum.photos/300/200'}" class="w-full h-48 object-cover rounded-lg mb-3" onerror="this.src='https://picsum.photos/300/200'">
+                    <h3 class="font-bold text-lg">${escapeHtml(p.name)}</h3>
+                    <p class="text-gray-500 text-sm">${escapeHtml(p.description?.substring(0,80) || '')}</p>
+                    <div class="flex justify-between items-center mt-3">
+                        <span class="text-purple-600 font-bold text-xl">KES ${p.price}</span>
+                        <button class="viewSellerBtn text-blue-600 text-sm" data-seller="${p.sellerId}">View Seller</button>
+                    </div>
+                    <div class="mt-2 text-xs text-gray-500"><i class="fas fa-store"></i> ${escapeHtml(p.sellers?.store_name || 'Seller')}</div>
+                </div>
+            `).join('');
+            // Attach event listeners for seller info
+            document.querySelectorAll('.viewSellerBtn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const sellerId = btn.dataset.seller;
+                    const sellerDoc = await db.collection('sellers').doc(sellerId).get();
+                    if(sellerDoc.exists) {
+                        const data = sellerDoc.data();
+                        alert(`🏪 ${data.store_name}\n👤 ${data.full_name}\n📞 ${data.mobile}\n✉️ ${data.email}`);
+                    } else {
+                        alert('Seller information not available');
+                    }
+                });
+            });
+        }
+        
+        // Seller: load their own products
+        async function loadUserProducts() {
+            if(!currentUser || currentRole !== 'seller') return;
+            const q = await db.collection('products').where('sellerId', '==', currentUser.id).get();
+            const container = document.getElementById('myProductsList');
+            if(q.empty) { container.innerHTML = '<p class="text-gray-500 text-center">No products yet. Add your first product!</p>'; return; }
+            let html = '';
+            q.forEach(doc => {
+                const p = doc.data();
+                html += `
+                    <div class="flex gap-3 bg-gray-50 p-3 rounded-lg">
+                        <img src="${p.image_url || 'https://picsum.photos/60/60'}" class="w-16 h-16 rounded-lg object-cover">
+                        <div class="flex-1"><p class="font-semibold">${escapeHtml(p.name)}</p><p class="text-sm text-gray-600">KES ${p.price}</p></div>
+                        <button class="deleteProduct text-red-500" data-id="${doc.id}"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+            document.querySelectorAll('.deleteProduct').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    await db.collection('products').doc(btn.dataset.id).delete();
+                    loadUserProducts();
+                    loadProducts();
+                    showToast('Product deleted');
+                });
+            });
+        }
+        
+        // Add product (seller only)
+        async function addNewProduct() {
+            if(!currentUser || currentRole !== 'seller') { alert('Only sellers can add products'); return; }
+            const name = prompt('Product name:');
+            const description = prompt('Description:');
+            const price = parseInt(prompt('Price (KES):'));
+            const imageUrl = prompt('Image URL (or leave empty for default):', 'https://picsum.photos/300/200');
+            if(name && price) {
+                await db.collection('products').add({
+                    sellerId: currentUser.id,
+                    name,
+                    description: description || '',
+                    price,
+                    image_url: imageUrl || 'https://picsum.photos/300/200',
+                    created_at: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                loadUserProducts();
+                loadProducts();
+                showToast('Product added!');
+            }
+        }
+        
+        // ------------------------- LIVE STREAMING (Client camera + Firestore session) -------------------------
+        async function startLiveStream() {
+            if(!currentUser || currentRole !== 'seller') { alert('Only sellers can go live'); return; }
+            if(activeLiveSessionId) { alert('You are already live! Stop current stream first.'); return; }
+            try {
+                if(liveStream) liveStream.getTracks().forEach(t => t.stop());
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: currentCamera } }, audio: true });
+                liveStream = stream;
+                document.getElementById('localVideo').srcObject = stream;
+                // Create live session in Firestore
+                const docRef = await db.collection('live_sessions').add({
+                    sellerId: currentUser.id,
+                    sellerName: currentUser.store_name || currentUser.full_name,
+                    status: 'live',
+                    started_at: firebase.firestore.FieldValue.serverTimestamp(),
+                    ended_at: null
+                });
+                activeLiveSessionId = docRef.id;
+                document.getElementById('startLiveBtn').classList.add('hidden');
+                document.getElementById('stopLiveBtn').classList.remove('hidden');
+                document.getElementById('activeBroadcast').classList.remove('hidden');
+                document.getElementById('liveStatusText').innerHTML = '🔴 LIVE NOW - Broadcasting';
+                showToast('You are now LIVE!');
+            } catch(err) {
+                console.error(err);
+                alert('Camera access denied or error');
+            }
+        }
+        
+        async function stopLiveStream() {
+            if(liveStream) { liveStream.getTracks().forEach(t => t.stop()); liveStream = null; }
+            document.getElementById('localVideo').srcObject = null;
+            document.getElementById('startLiveBtn').classList.remove('hidden');
+            document.getElementById('stopLiveBtn').classList.add('hidden');
+            document.getElementById('activeBroadcast').classList.add('hidden');
+            document.getElementById('liveStatusText').innerHTML = '⚫ Offline';
+            // Update Firestore session
+            if(activeLiveSessionId) {
+                await db.collection('live_sessions').doc(activeLiveSessionId).update({
+                    status: 'ended',
+                    ended_at: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                activeLiveSessionId = null;
+            }
+            showToast('Live stream ended');
+        }
+        
+        async function switchCamera() {
+            currentCamera = currentCamera === 'user' ? 'environment' : 'user';
+            if(liveStream) {
+                // Restart stream with new camera while live
+                await stopLiveStream();
+                await startLiveStream();
+            } else if(document.getElementById('localVideo').srcObject) {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: currentCamera } }, audio: true });
+                if(liveStream) liveStream.getTracks().forEach(t => t.stop());
+                document.getElementById('localVideo').srcObject = stream;
+                liveStream = stream;
+            }
+            showToast(currentCamera === 'environment' ? 'Back camera active' : 'Front camera active');
+        }
+        
+        // ------------------------- AUTH & USER STATE (Firebase Auth + Firestore roles) -------------------------
+        async function fetchUserRoleAndData(user) {
+            if(!user) return null;
+            // check sellers collection
+            const sellerDoc = await db.collection('sellers').doc(user.uid).get();
+            if(sellerDoc.exists) {
+                const data = sellerDoc.data();
+                return { id: user.uid, email: user.email, role: 'seller', store_name: data.store_name, full_name: data.full_name, mobile: data.mobile };
+            }
+            const buyerDoc = await db.collection('buyers').doc(user.uid).get();
+            if(buyerDoc.exists) {
+                const data = buyerDoc.data();
+                return { id: user.uid, email: user.email, role: 'buyer', store_name: null, full_name: data.full_name, mobile: data.mobile };
+            }
+            return null;
+        }
+        
+        async function updateUIAfterAuth() {
+            const user = auth.currentUser;
+            if(user) {
+                const userData = await fetchUserRoleAndData(user);
+                if(userData) {
+                    currentUser = userData;
+                    currentRole = userData.role;
+                    document.getElementById('profileLoggedOut').classList.add('hidden');
+                    document.getElementById('profileLoggedIn').classList.remove('hidden');
+                    document.getElementById('userStoreName').innerText = currentUser.store_name || 'N/A';
+                    document.getElementById('userFullName').innerText = currentUser.full_name;
+                    document.querySelector('#userMobile span').innerText = currentUser.mobile;
+                    document.getElementById('userRole').innerText = currentRole === 'seller' ? 'Seller Account' : 'Buyer Account';
+                    if(currentRole === 'seller') {
+                        document.getElementById('sellerPanel').classList.remove('hidden');
+                        document.getElementById('buyerPanel').classList.add('hidden');
+                        loadUserProducts();
+                    } else {
+                        document.getElementById('sellerPanel').classList.add('hidden');
+                        document.getElementById('buyerPanel').classList.remove('hidden');
+                    }
+                    updateUIBasedOnRole();
+                } else {
+                    // Auth user exists but no profile? sign out
+                    await auth.signOut();
+                    currentUser = null; currentRole = null;
+                    resetProfileUI();
+                }
+            } else {
+                currentUser = null; currentRole = null;
+                resetProfileUI();
+            }
+        }
+        
+        function resetProfileUI() {
+            document.getElementById('profileLoggedOut').classList.remove('hidden');
+            document.getElementById('profileLoggedIn').classList.add('hidden');
+            updateUIBasedOnRole();
+        }
+        
+        // Registration handler
+        async function handleRegister() {
+            const role = prompt('Are you a Seller or Buyer? (Enter "seller" or "buyer")');
+            if(!role || (role.toLowerCase() !== 'seller' && role.toLowerCase() !== 'buyer')) { alert('Please choose seller or buyer'); return; }
+            const email = prompt('Enter email:');
+            const password = prompt('Enter password (min 6 chars):');
+            const fullName = prompt('Your full name:');
+            const mobile = prompt('Mobile number:');
+            let storeName = null;
+            if(role.toLowerCase() === 'seller') storeName = prompt('Store/Business name:');
+            if(!email || !password || !fullName || !mobile) { alert('All fields required'); return; }
+            try {
+                const userCred = await auth.createUserWithEmailAndPassword(email, password);
+                const uid = userCred.user.uid;
+                if(role.toLowerCase() === 'seller') {
+                    await db.collection('sellers').doc(uid).set({
+                        email, store_name: storeName, full_name: fullName, mobile, role: 'seller'
+                    });
+                } else {
+                    await db.collection('buyers').doc(uid).set({
+                        email, full_name: fullName, mobile, role: 'buyer'
+                    });
+                }
+                alert('Registration successful! You are now logged in.');
+                // auto login triggers state change
+            } catch(err) {
+                alert('Registration error: ' + err.message);
+            }
+        }
+        
+        // Login handler (using Firebase Auth)
+        async function handleLogin() {
+            const email = prompt('Enter email:');
+            const password = prompt('Enter password:');
+            if(!email || !password) return;
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                // UI update will be handled by onAuthStateChanged
+                alert('Login successful');
+            } catch(err) {
+                alert('Login failed: ' + err.message);
+            }
+        }
+        
+        // Logout
+        async function handleLogout() {
+            await auth.signOut();
+            showToast('Logged out');
+        }
+        
+        // Live session periodic checker (show banner if any seller live)
+        async function checkLiveNotification() {
+            const snapshot = await db.collection('live_sessions').where('status', '==', 'live').limit(1).get();
+            if(!snapshot.empty) {
+                const liveData = snapshot.docs[0].data();
+                if(!document.querySelector('.live-notification') && liveData.sellerName) {
+                    const banner = document.createElement('div');
+                    banner.className = 'live-notification fixed top-20 right-4 bg-red-600 text-white p-3 rounded-lg shadow-lg z-50 animate-bounce';
+                    banner.innerHTML = `<i class="fas fa-video"></i> ${liveData.sellerName} is LIVE!`;
+                    document.body.appendChild(banner);
+                    setTimeout(() => banner.remove(), 5000);
+                }
+            }
+        }
+        
+        // ------------------------- EVENT LISTENERS & INIT -------------------------
+        document.addEventListener('DOMContentLoaded', () => {
+            // Navigation
+            document.getElementById('homeBtn').addEventListener('click', () => showPage('home'));
+            document.getElementById('marketBtn').addEventListener('click', () => { showPage('market'); loadProducts(); });
+            document.getElementById('sellBtn').addEventListener('click', () => {
+                if(currentRole !== 'seller') { alert('Only sellers can access live studio'); return; }
+                showPage('live');
+                if(currentUser) { document.getElementById('authRequired').classList.add('hidden'); document.getElementById('liveStudio').classList.remove('hidden'); }
+                else { document.getElementById('authRequired').classList.remove('hidden'); document.getElementById('liveStudio').classList.add('hidden'); }
+            });
+            document.getElementById('profileBtn').addEventListener('click', () => showPage('profile'));
+            document.querySelector('.mobile-home').addEventListener('click', () => showPage('home'));
+            document.querySelector('.mobile-market').addEventListener('click', () => { showPage('market'); loadProducts(); });
+            document.querySelector('.mobile-live').addEventListener('click', () => {
+                if(currentRole !== 'seller') { alert('Only sellers can access live studio'); return; }
+                showPage('live');
+                if(currentUser) { document.getElementById('authRequired').classList.add('hidden'); document.getElementById('liveStudio').classList.remove('hidden'); }
+            });
+            document.querySelector('.mobile-profile').addEventListener('click', () => showPage('profile'));
+            document.getElementById('gotoAuthBtn').addEventListener('click', () => showPage('profile'));
+            document.getElementById('startLiveBtn').addEventListener('click', startLiveStream);
+            document.getElementById('stopLiveBtn').addEventListener('click', stopLiveStream);
+            document.getElementById('switchCamBtn').addEventListener('click', switchCamera);
+            document.getElementById('searchInput').addEventListener('input', () => renderProducts());
+            document.querySelector('.exploreBtn').addEventListener('click', () => { showPage('market'); loadProducts(); });
+            document.querySelector('.startSellingBtn').addEventListener('click', () => {
+                if(currentRole !== 'seller') { alert('Please register as a seller to start live selling'); showPage('profile'); return; }
+                showPage('live');
+                if(currentUser) { document.getElementById('authRequired').classList.add('hidden'); document.getElementById('liveStudio').classList.remove('hidden'); }
+            });
+            
+            // Auth buttons
+            document.getElementById('showRegisterModalBtn').addEventListener('click', handleRegister);
+            document.getElementById('showLoginModalBtn').addEventListener('click', handleLogin);
+            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+            document.getElementById('showAddProductForm').addEventListener('click', addNewProduct);
+            
+            // Firebase Auth state listener
+            auth.onAuthStateChanged(async (user) => {
+                await updateUIAfterAuth();
+                if(user && currentRole === 'seller') loadUserProducts();
+                if(!user) {
+                    // clean live studio if open
+                    if(liveStream) { liveStream.getTracks().forEach(t => t.stop()); liveStream = null; }
+                    activeLiveSessionId = null;
+                }
+            });
+            
+            // initial load
+            loadProducts();
+            // periodic live notifications
+            setInterval(checkLiveNotification, 25000);
+        });
+    </script>
+</body>
+</html>
