@@ -495,90 +495,85 @@ await auth.signOut();
 toast('👋 Logged out');
 }
 
-// ========== FIXED AUTH STATE HANDLER (ROBUST) ==========
+// ========== FIXED AUTH STATE HANDLER (CLEAN VERSION) ==========
 auth.onAuthStateChanged(async (user) => {
-try {
-if (user) {
-// 1) Check seller document first
-const sellerDoc = await db.collection('sellers').doc(user.uid).get();
-if (sellerDoc.exists) {
-const data = sellerDoc.data();
-currentUser = data;
-currentRole = 'seller';
-// Update UI logged-in section
-document.getElementById('loggedOut').classList.add('hidden');
-document.getElementById('loggedIn').classList.remove('hidden');
-document.getElementById('sellerPanel').classList.remove('hidden');
-// Fallback values to avoid empty fields
-document.getElementById('userName').innerText = data.store_name || 'Seller Store';
-document.getElementById('userRole').innerText = 'Seller Account 🛍️';
-document.getElementById('userPhone').innerText = data.mobile || '📞 Not provided';
-updateSellerUI();
-// Seller experience: open live studio & load seller's products
-showPage('live');
-document.getElementById('liveAuthRequired').classList.add('hidden');
-document.getElementById('liveStudio').classList.remove('hidden');
-loadSellerProducts();    // load seller own products
-return; // ✅ early exit, no buyer check needed
-}
+  try {
+    if (user) {
+      // 1) Check seller document
+      const sellerDoc = await db.collection('sellers').doc(user.uid).get();
+      if (sellerDoc.exists) {
+        const data = sellerDoc.data();
+        currentUser = data;
+        currentRole = 'seller';
 
-// 2) Check buyer document
-const buyerDoc = await db.collection('buyers').doc(user.uid).get();
-if (buyerDoc.exists) {
-const data = buyerDoc.data();
-currentUser = data;
-currentRole = 'buyer';
-document.getElementById('loggedOut').classList.add('hidden');
-document.getElementById('loggedIn').classList.remove('hidden');
-document.getElementById('sellerPanel').classList.add('hidden');
-document.getElementById('userName').innerText = data.full_name || 'Valued Buyer';
-document.getElementById('userRole').innerText = 'Buyer Account 🛒';
-document.getElementById('userPhone').innerText = data.mobile || '📞 Not provided';
-updateSellerUI();
-openMarket();  // redirect buyer to marketplace
-return;
-}
+        document.getElementById('loggedOut').classList.add('hidden');
+        document.getElementById('loggedIn').classList.remove('hidden');
+        document.getElementById('sellerPanel').classList.remove('hidden');
+        document.getElementById('userName').innerText = data.store_name || 'Seller';
+        document.getElementById('userRole').innerText = 'Seller Account';
+        document.getElementById('userPhone').innerText = data.mobile || '';
 
-// 3) User authenticated but NO profile in Firestore (incomplete registration)
-console.warn('User exists without seller/buyer profile');
-await auth.signOut();   // force signout to avoid ghost session
-currentUser = null;
-currentRole = null;
-document.getElementById('loggedOut').classList.remove('hidden');
-document.getElementById('loggedIn').classList.add('hidden');
-updateSellerUI();
-showPage('home');
-alert('⚠️ Your account exists but profile is missing. Please register again.');
-return;
+        updateSellerUI();
+        showPage('live');
+        document.getElementById('liveAuthRequired').classList.add('hidden');
+        document.getElementById('liveStudio').classList.remove('hidden');
+        loadSellerProducts();
+        return;
+      }
 
-} else {
-// USER LOGGED OUT
-currentUser = null;
-currentRole = null;
-document.getElementById('loggedOut').classList.remove('hidden');
-document.getElementById('loggedIn').classList.add('hidden');
-updateSellerUI();
-showPage('home');
-// reset live studio UI to avoid leftover video
-if(document.getElementById('liveStudio')) {
-document.getElementById('liveStudio').classList.add('hidden');
-document.getElementById('liveAuthRequired').classList.remove('hidden');
-}
-if(stream){
-stopLive();
-}
-}
-} catch (error) {
-console.error('Auth state error:', error);
-alert('Something went wrong: ' + error.message);
-// Reset to safe logged-out state
-currentUser = null;
-currentRole = null;
-document.getElementById('loggedOut').classList.remove('hidden');
-document.getElementById('loggedIn').classList.add('hidden');
-updateSellerUI();
-showPage('home');
-}
+      // 2) Check buyer document
+      const buyerDoc = await db.collection('buyers').doc(user.uid).get();
+      if (buyerDoc.exists) {
+        const data = buyerDoc.data();
+        currentUser = data;
+        currentRole = 'buyer';
+
+        document.getElementById('loggedOut').classList.add('hidden');
+        document.getElementById('loggedIn').classList.remove('hidden');
+        document.getElementById('sellerPanel').classList.add('hidden');
+        document.getElementById('userName').innerText = data.full_name || 'Buyer';
+        document.getElementById('userRole').innerText = 'Buyer Account';
+        document.getElementById('userPhone').innerText = data.mobile || '';
+
+        updateSellerUI();
+        openMarket();
+        return;
+      }
+
+      // 3) Authenticated but no Firestore profile → force logout
+      console.warn('User has no seller or buyer profile');
+      await auth.signOut();
+      alert('Your account profile is missing. Please register again.');
+      // fall through to logged-out state below
+    }
+
+    // LOGGED OUT (including after forced sign-out)
+    currentUser = null;
+    currentRole = null;
+    document.getElementById('loggedOut').classList.remove('hidden');
+    document.getElementById('loggedIn').classList.add('hidden');
+    document.getElementById('sellerPanel').classList.add('hidden');
+    updateSellerUI();
+    showPage('home');
+    // reset live studio UI to avoid leftover video
+    if (document.getElementById('liveStudio')) {
+      document.getElementById('liveStudio').classList.add('hidden');
+      document.getElementById('liveAuthRequired').classList.remove('hidden');
+    }
+    if (stream) {
+      stopLive();
+    }
+  } catch (error) {
+    console.error('Auth state error:', error);
+    alert(error.message);
+    // Reset to safe logged-out state on error
+    currentUser = null;
+    currentRole = null;
+    document.getElementById('loggedOut').classList.remove('hidden');
+    document.getElementById('loggedIn').classList.add('hidden');
+    updateSellerUI();
+    showPage('home');
+  }
 });
 
 // ---------- PRODUCT FUNCTIONS ----------
