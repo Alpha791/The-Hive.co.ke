@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TheHive Kenya</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>TheHive Kenya - Modern Live Marketplace</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -17,30 +17,33 @@
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family:Arial,Helvetica,sans-serif;
+font-family:system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 body{
 background:linear-gradient(135deg,#667eea,#764ba2);
 min-height:100vh;
-padding-bottom:100px;
+padding-bottom:85px;
 }
 
 .glass{
-background:rgba(255,255,255,0.95);
-backdrop-filter:blur(10px);
-border-radius:20px;
+background:rgba(255,255,255,0.96);
+backdrop-filter:blur(12px);
+border-radius:28px;
+box-shadow:0 8px 32px rgba(0,0,0,0.08);
 }
 
 .product-card{
 background:white;
-border-radius:20px;
+border-radius:24px;
 overflow:hidden;
-transition:.3s;
+transition:all 0.25s ease;
+box-shadow:0 4px 12px rgba(0,0,0,0.05);
 }
 
 .product-card:hover{
 transform:translateY(-5px);
+box-shadow:0 20px 30px -12px rgba(0,0,0,0.2);
 }
 
 .mobile-nav{
@@ -48,28 +51,37 @@ position:fixed;
 bottom:0;
 left:0;
 right:0;
-background:white;
+background:rgba(255,255,255,0.96);
+backdrop-filter:blur(12px);
 display:flex;
 justify-content:space-around;
-padding:15px;
+padding:12px 20px;
 z-index:1000;
-border-radius:20px 20px 0 0;
+border-top:1px solid rgba(0,0,0,0.05);
+box-shadow:0 -4px 12px rgba(0,0,0,0.05);
 }
 
 .page{
 display:none;
+animation:fadeIn 0.2s ease;
 }
 
 .active-page{
 display:block;
 }
 
+@keyframes fadeIn{
+from{ opacity:0; transform:translateY(8px);}
+to{ opacity:1; transform:translateY(0);}
+}
+
 video{
 width:100%;
-border-radius:20px;
-background:black;
+border-radius:28px;
+background:#1e1e2f;
 height:300px;
 object-fit:cover;
+box-shadow:0 12px 28px rgba(0,0,0,0.2);
 }
 
 .toast{
@@ -77,153 +89,193 @@ position:fixed;
 bottom:100px;
 left:50%;
 transform:translateX(-50%);
-background:black;
+background:#1f2937;
 color:white;
-padding:10px 20px;
-border-radius:50px;
+padding:12px 24px;
+border-radius:60px;
 z-index:2000;
+font-weight:500;
+box-shadow:0 10px 20px rgba(0,0,0,0.2);
+backdrop-filter:blur(4px);
 }
 
 .hidden{
-display:none;
+display:none !important;
+}
+
+button, .product-card, .glass{
+transition: all 0.2s;
+}
+
+.seller-badge{
+background:#f97316;
+color:white;
+padding:4px 12px;
+border-radius:60px;
+font-size:0.75rem;
+font-weight:600;
 }
 </style>
 </head>
 
 <body>
 
-<div class="max-w-7xl mx-auto p-4">
+<div class="max-w-7xl mx-auto p-4 md:p-5">
 
-<div class="glass p-4 mb-6 flex justify-between items-center">
+<!-- header glass card -->
+<div class="glass p-4 mb-6 flex justify-between items-center flex-wrap gap-3">
 
 <div class="flex items-center gap-3">
-<div class="bg-purple-600 p-3 rounded-xl">
+<div class="bg-gradient-to-r from-purple-600 to-pink-600 p-3 rounded-2xl shadow-md">
 <i class="fas fa-store text-white text-2xl"></i>
 </div>
 
-<h1 class="text-2xl font-bold">
+<h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">
 TheHive<span class="text-purple-600">Kenya</span>
 </h1>
 </div>
 
 <div class="hidden md:flex gap-3">
 
-<button onclick="showPage('home')" class="bg-purple-600 text-white px-5 py-2 rounded-full">
-Home
+<button onclick="showPage('home')" class="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-full transition shadow-sm">
+🏠 Home
 </button>
 
-<button onclick="openMarket()" class="bg-gray-200 px-5 py-2 rounded-full">
-Market
+<button onclick="openMarket()" class="bg-gray-100 hover:bg-gray-200 px-5 py-2 rounded-full transition">
+🛍️ Market
 </button>
 
-<button onclick="openLive()" class="bg-gray-200 px-5 py-2 rounded-full seller-only hidden">
-Live
+<button onclick="openLive()" class="bg-gray-100 hover:bg-gray-200 px-5 py-2 rounded-full transition seller-only hidden">
+📡 Live
 </button>
 
-<button onclick="showPage('profile')" class="bg-gray-200 px-5 py-2 rounded-full">
-Profile
+<button onclick="showPage('profile')" class="bg-gray-100 hover:bg-gray-200 px-5 py-2 rounded-full transition">
+👤 Profile
 </button>
 
 </div>
 
 </div>
 
+<!-- HOME PAGE -->
 <div id="home" class="page active-page">
 
 <div class="glass p-8 text-center mb-6">
 
-<h2 class="text-4xl font-bold mb-3">
+<h2 class="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-purple-700 to-pink-600 bg-clip-text text-transparent">
 Welcome To TheHive Kenya
 </h2>
 
-<p class="text-gray-600 mb-6">
-Modern Marketplace With Live Video Selling
+<p class="text-gray-600 text-lg mb-6 max-w-xl mx-auto">
+Modern marketplace with live video selling — connect, sell, and shop in real time.
 </p>
 
 <div class="flex justify-center gap-4 flex-wrap">
 
-<button onclick="openMarket()" class="bg-purple-600 text-white px-6 py-3 rounded-full">
+<button onclick="openMarket()" class="bg-purple-600 hover:bg-purple-700 text-white px-7 py-3 rounded-full shadow-md font-semibold">
 Explore Products
 </button>
 
-<button onclick="openLive()" class="bg-pink-600 text-white px-6 py-3 rounded-full seller-only hidden">
-Start Selling
+<button onclick="openLive()" class="bg-pink-600 hover:bg-pink-700 text-white px-7 py-3 rounded-full shadow-md font-semibold seller-only hidden">
+🎥 Start Selling
 </button>
 
 </div>
 
 </div>
 
+<div class="grid md:grid-cols-3 gap-5 text-center">
+<div class="glass p-5">
+<i class="fas fa-video text-4xl text-purple-600 mb-3"></i>
+<h3 class="font-bold text-xl">Live Streams</h3>
+<p class="text-gray-500">Sell products in real-time</p>
+</div>
+<div class="glass p-5">
+<i class="fas fa-tag text-4xl text-purple-600 mb-3"></i>
+<h3 class="font-bold text-xl">Authentic Products</h3>
+<p class="text-gray-500">Verified Kenyan sellers</p>
+</div>
+<div class="glass p-5">
+<i class="fas fa-shield-alt text-4xl text-purple-600 mb-3"></i>
+<h3 class="font-bold text-xl">Secure Checkout</h3>
+<p class="text-gray-500">Trusted marketplace</p>
+</div>
+</div>
 </div>
 
+<!-- MARKETPLACE PAGE -->
 <div id="market" class="page">
 
 <div class="glass p-5 mb-5">
 
-<div class="flex flex-wrap justify-between gap-4">
+<div class="flex flex-wrap justify-between items-center gap-4">
 
-<h2 class="text-2xl font-bold">
-Marketplace
+<h2 class="text-2xl font-bold flex items-center gap-2">
+<i class="fas fa-store text-purple-600"></i> Marketplace
 </h2>
 
+<div class="relative">
+<i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
 <input
 type="text"
 id="searchInput"
-placeholder="Search..."
-class="border px-4 py-2 rounded-full"
+placeholder="Search products..."
+class="border border-gray-200 rounded-full pl-10 pr-5 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-purple-300"
 oninput="renderProducts()"
 >
-
 </div>
 
 </div>
 
-<div id="productsContainer" class="grid md:grid-cols-3 lg:grid-cols-4 gap-5"></div>
+</div>
+
+<div id="productsContainer" class="grid md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
 
 </div>
 
+<!-- LIVE STUDIO PAGE -->
 <div id="live" class="page">
 
 <div class="glass p-6">
 
-<h2 class="text-2xl font-bold text-center mb-5">
-Live Video Studio
+<h2 class="text-2xl font-bold text-center mb-5 flex items-center justify-center gap-2">
+<i class="fas fa-video text-pink-600"></i> Live Video Studio
 </h2>
 
-<div id="liveAuthRequired" class="text-center">
+<div id="liveAuthRequired" class="text-center py-8">
 
-<p class="mb-4">
-Login as seller to continue
-</p>
-
-<button onclick="showPage('profile')" class="bg-purple-600 text-white px-6 py-2 rounded-full">
+<div class="bg-amber-50 rounded-2xl p-6 max-w-md mx-auto">
+<i class="fas fa-lock text-4xl text-amber-600 mb-3"></i>
+<p class="mb-4 text-gray-700">Login as a seller to start live streaming</p>
+<button onclick="showPage('profile')" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full shadow">
 Go To Profile
 </button>
+</div>
 
 </div>
 
 <div id="liveStudio" class="hidden">
 
-<video id="video" autoplay playsinline muted></video>
+<video id="video" autoplay playsinline muted class="rounded-2xl border-2 border-purple-100"></video>
 
 <div class="flex gap-3 justify-center mt-5 flex-wrap">
 
-<button onclick="switchCamera()" class="bg-gray-800 text-white px-5 py-2 rounded-full">
-Switch Camera
+<button onclick="switchCamera()" class="bg-gray-800 hover:bg-gray-900 text-white px-5 py-2 rounded-full transition">
+🔄 Switch Camera
 </button>
 
-<button id="startBtn" onclick="startLive()" class="bg-red-600 text-white px-5 py-2 rounded-full">
-Start Live
+<button id="startBtn" onclick="startLive()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full shadow-md transition">
+🔴 Start Live
 </button>
 
-<button id="stopBtn" onclick="stopLive()" class="bg-gray-700 text-white px-5 py-2 rounded-full hidden">
-Stop Live
+<button id="stopBtn" onclick="stopLive()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-full shadow-md transition hidden">
+⏹️ Stop Live
 </button>
 
 </div>
 
 <div class="mt-5 text-center">
-<p id="liveStatus">⚫ Offline</p>
+<p id="liveStatus" class="inline-block px-4 py-1 rounded-full bg-gray-100 text-gray-700">⚫ Offline</p>
 </div>
 
 </div>
@@ -232,24 +284,28 @@ Stop Live
 
 </div>
 
+<!-- PROFILE PAGE -->
 <div id="profile" class="page">
 
 <div class="glass p-6">
 
-<h2 class="text-2xl font-bold mb-6">
-Account
+<h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+<i class="fas fa-user-circle text-purple-600"></i> Account
 </h2>
 
 <div id="loggedOut">
 
-<div class="text-center">
+<div class="text-center bg-gray-50 rounded-2xl p-8">
 
-<button onclick="registerUser()" class="bg-green-600 text-white px-6 py-2 rounded-full">
-Register
+<i class="fas fa-sign-in-alt text-4xl text-purple-500 mb-3"></i>
+<p class="mb-5 text-gray-600">Join TheHive as buyer or seller</p>
+
+<button onclick="registerUser()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full shadow">
+📝 Register
 </button>
 
-<button onclick="loginUser()" class="bg-purple-600 text-white px-6 py-2 rounded-full ml-3">
-Login
+<button onclick="loginUser()" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full shadow ml-3">
+🔑 Login
 </button>
 
 </div>
@@ -258,28 +314,33 @@ Login
 
 <div id="loggedIn" class="hidden">
 
-<div class="text-center">
+<div class="text-center bg-gradient-to-br from-purple-50 to-white rounded-2xl p-6">
 
-<h3 id="userName" class="text-xl font-bold"></h3>
+<div class="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+<i class="fas fa-user fa-2x text-purple-700"></i>
+</div>
 
-<p id="userRole" class="text-purple-600 mt-2"></p>
+<h3 id="userName" class="text-2xl font-bold"></h3>
 
-<p id="userPhone" class="text-gray-500 mt-1"></p>
+<p id="userRole" class="text-purple-600 font-semibold mt-1"></p>
 
-<button onclick="logoutUser()" class="bg-red-600 text-white px-5 py-2 rounded-full mt-4">
-Logout
+<p id="userPhone" class="text-gray-500 mt-1 flex items-center justify-center gap-1"><i class="fas fa-phone-alt text-sm"></i> <span></span></p>
+
+<button onclick="logoutUser()" class="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-full mt-5 transition shadow">
+🚪 Logout
 </button>
 
 </div>
 
-<div id="sellerPanel" class="hidden mt-6">
+<div id="sellerPanel" class="hidden mt-7 border-t pt-5">
 
-<button onclick="addProduct()" class="bg-green-600 text-white px-5 py-2 rounded-full w-full">
-Add Product
+<button onclick="addProduct()" class="bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-full w-full font-semibold shadow-md transition flex items-center justify-center gap-2">
+<i class="fas fa-plus-circle"></i> Add New Product
 </button>
 
-<div id="myProducts" class="mt-5 space-y-3"></div>
-
+<div class="mt-5">
+<h4 class="font-semibold text-gray-700 mb-3">📦 My Products</h4>
+<div id="myProducts" class="space-y-3"></div>
 </div>
 
 </div>
@@ -290,28 +351,36 @@ Add Product
 
 </div>
 
+</div>
+
+<!-- mobile bottom nav -->
 <div class="mobile-nav md:hidden">
 
-<button onclick="showPage('home')">
+<button onclick="showPage('home')" class="flex flex-col items-center text-gray-600 hover:text-purple-600">
 <i class="fas fa-home text-2xl"></i>
+<span class="text-xs">Home</span>
 </button>
 
-<button onclick="openMarket()">
+<button onclick="openMarket()" class="flex flex-col items-center text-gray-600 hover:text-purple-600">
 <i class="fas fa-store text-2xl"></i>
+<span class="text-xs">Market</span>
 </button>
 
-<button onclick="openLive()" class="seller-only hidden">
+<button onclick="openLive()" class="flex flex-col items-center text-gray-600 hover:text-pink-600 seller-only hidden">
 <i class="fas fa-video text-2xl"></i>
+<span class="text-xs">Live</span>
 </button>
 
-<button onclick="showPage('profile')">
+<button onclick="showPage('profile')" class="flex flex-col items-center text-gray-600 hover:text-purple-600">
 <i class="fas fa-user text-2xl"></i>
+<span class="text-xs">Profile</span>
 </button>
 
 </div>
 
 <script>
 
+// FIREBASE CONFIG
 const firebaseConfig = {
 apiKey: "AIzaSyDBVNHvRHyPd5g7wC-5ivadmSdUqZhJnws",
 authDomain: "hive-e919c.firebaseapp.com",
@@ -326,458 +395,367 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-let currentUser = null;
-let currentRole = null;
+let currentUser = null;      // stores profile data (seller or buyer)
+let currentRole = null;      // 'seller' or 'buyer'
 let stream = null;
 let currentCamera = 'user';
 
+// toast helper
 function toast(message){
-
-const old=document.querySelector('.toast');
-
-if(old) old.remove();
-
-const div=document.createElement('div');
-
-div.className='toast';
-
-div.innerText=message;
-
+const oldToast = document.querySelector('.toast');
+if(oldToast) oldToast.remove();
+const div = document.createElement('div');
+div.className = 'toast';
+div.innerText = message;
 document.body.appendChild(div);
-
-setTimeout(()=>{
-div.remove();
-},3000);
-
+setTimeout(() => div.remove(), 3200);
 }
 
-function showPage(page){
-
-document.querySelectorAll('.page').forEach(p=>{
-p.classList.remove('active-page');
+// page navigation
+function showPage(pageId){
+document.querySelectorAll('.page').forEach(page => {
+page.classList.remove('active-page');
 });
-
-document.getElementById(page).classList.add('active-page');
-
+document.getElementById(pageId).classList.add('active-page');
 }
 
+// update visibility for seller-only elements
 function updateSellerUI(){
-
-document.querySelectorAll('.seller-only').forEach(el=>{
-
-if(currentRole==='seller'){
+document.querySelectorAll('.seller-only').forEach(el => {
+if(currentRole === 'seller'){
 el.classList.remove('hidden');
-}else{
+} else {
 el.classList.add('hidden');
 }
-
 });
-
 }
 
+// REGISTER
 async function registerUser(){
-
-const role=prompt('seller or buyer');
-
+const role = prompt('Select account type:\n\n"seller" or "buyer"');
 if(!role) return;
-
-const email=prompt('Email');
-
-const password=prompt('Password');
-
-const fullName=prompt('Full Name');
-
-const mobile=prompt('Phone Number');
-
-let storeName='';
-
-if(role==='seller'){
-storeName=prompt('Store Name');
+const email = prompt('Email address:');
+if(!email) return;
+const password = prompt('Password (min 6 characters):');
+if(!password || password.length < 6){
+alert('Password must be at least 6 characters');
+return;
 }
-
+const fullName = prompt('Full name:');
+const mobile = prompt('Phone number:');
+let storeName = '';
+if(role === 'seller'){
+storeName = prompt('Store / Business name:');
+if(!storeName) return;
+}
 try{
-
-const userCredential=await auth.createUserWithEmailAndPassword(email,password);
-
-const uid=userCredential.user.uid;
-
-if(role==='seller'){
-
+const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+const uid = userCredential.user.uid;
+if(role === 'seller'){
 await db.collection('sellers').doc(uid).set({
 email,
-full_name:fullName,
+full_name: fullName,
 mobile,
-store_name:storeName,
-role:'seller'
+store_name: storeName,
+role: 'seller',
+createdAt: firebase.firestore.FieldValue.serverTimestamp()
 });
-
-}else{
-
+} else {
 await db.collection('buyers').doc(uid).set({
 email,
-full_name:fullName,
+full_name: fullName,
 mobile,
-role:'buyer'
+role: 'buyer',
+createdAt: firebase.firestore.FieldValue.serverTimestamp()
 });
-
 }
-
-toast('Registration successful');
-
-}catch(error){
-
-alert(error.message);
-
-}
-
-}
-
-async function loginUser(){
-
-const email=prompt('Email');
-
-const password=prompt('Password');
-
-if(!email || !password) return;
-
-try{
-
-await auth.signInWithEmailAndPassword(email,password);
-
-toast('Login successful');
-
-}catch(error){
-
-alert(error.message);
-
-}
-
-}
-
-async function logoutUser(){
-
+toast('✅ Registration successful! Please login.');
 await auth.signOut();
-
-toast('Logged out');
-
+} catch(error){
+alert('Registration error: ' + error.message);
+}
 }
 
-auth.onAuthStateChanged(async(user)=>{
+// LOGIN
+async function loginUser(){
+const email = prompt('Email:');
+const password = prompt('Password:');
+if(!email || !password) return;
+try{
+await auth.signInWithEmailAndPassword(email, password);
+toast('🔓 Login successful');
+} catch(error){
+alert('Login failed: ' + error.message);
+}
+}
 
-if(user){
+// LOGOUT
+async function logoutUser(){
+await auth.signOut();
+toast('👋 Logged out');
+}
 
-const sellerDoc=await db.collection('sellers').doc(user.uid).get();
-
-const buyerDoc=await db.collection('buyers').doc(user.uid).get();
-
-if(sellerDoc.exists){
-
-const data=sellerDoc.data();
-
-currentUser=data;
-
-currentRole='seller';
-
+// ========== FIXED AUTH STATE HANDLER (ROBUST) ==========
+auth.onAuthStateChanged(async (user) => {
+try {
+if (user) {
+// 1) Check seller document first
+const sellerDoc = await db.collection('sellers').doc(user.uid).get();
+if (sellerDoc.exists) {
+const data = sellerDoc.data();
+currentUser = data;
+currentRole = 'seller';
+// Update UI logged-in section
 document.getElementById('loggedOut').classList.add('hidden');
-
 document.getElementById('loggedIn').classList.remove('hidden');
-
 document.getElementById('sellerPanel').classList.remove('hidden');
-
-document.getElementById('userName').innerText=data.store_name;
-
-document.getElementById('userRole').innerText='Seller Account';
-
-document.getElementById('userPhone').innerText=data.mobile;
-
+// Fallback values to avoid empty fields
+document.getElementById('userName').innerText = data.store_name || 'Seller Store';
+document.getElementById('userRole').innerText = 'Seller Account 🛍️';
+document.getElementById('userPhone').innerText = data.mobile || '📞 Not provided';
 updateSellerUI();
-
+// Seller experience: open live studio & load seller's products
 showPage('live');
-
 document.getElementById('liveAuthRequired').classList.add('hidden');
-
 document.getElementById('liveStudio').classList.remove('hidden');
-
-loadSellerProducts();
-
+loadSellerProducts();    // load seller own products
+return; // ✅ early exit, no buyer check needed
 }
 
-else if(buyerDoc.exists){
-
-const data=buyerDoc.data();
-
-currentUser=data;
-
-currentRole='buyer';
-
+// 2) Check buyer document
+const buyerDoc = await db.collection('buyers').doc(user.uid).get();
+if (buyerDoc.exists) {
+const data = buyerDoc.data();
+currentUser = data;
+currentRole = 'buyer';
 document.getElementById('loggedOut').classList.add('hidden');
-
 document.getElementById('loggedIn').classList.remove('hidden');
-
 document.getElementById('sellerPanel').classList.add('hidden');
-
-document.getElementById('userName').innerText=data.full_name;
-
-document.getElementById('userRole').innerText='Buyer Account';
-
-document.getElementById('userPhone').innerText=data.mobile;
-
+document.getElementById('userName').innerText = data.full_name || 'Valued Buyer';
+document.getElementById('userRole').innerText = 'Buyer Account 🛒';
+document.getElementById('userPhone').innerText = data.mobile || '📞 Not provided';
 updateSellerUI();
-
-openMarket();
-
+openMarket();  // redirect buyer to marketplace
+return;
 }
 
-}else{
-
-currentUser=null;
-
-currentRole=null;
-
+// 3) User authenticated but NO profile in Firestore (incomplete registration)
+console.warn('User exists without seller/buyer profile');
+await auth.signOut();   // force signout to avoid ghost session
+currentUser = null;
+currentRole = null;
 document.getElementById('loggedOut').classList.remove('hidden');
-
 document.getElementById('loggedIn').classList.add('hidden');
-
 updateSellerUI();
-
 showPage('home');
+alert('⚠️ Your account exists but profile is missing. Please register again.');
+return;
 
+} else {
+// USER LOGGED OUT
+currentUser = null;
+currentRole = null;
+document.getElementById('loggedOut').classList.remove('hidden');
+document.getElementById('loggedIn').classList.add('hidden');
+updateSellerUI();
+showPage('home');
+// reset live studio UI to avoid leftover video
+if(document.getElementById('liveStudio')) {
+document.getElementById('liveStudio').classList.add('hidden');
+document.getElementById('liveAuthRequired').classList.remove('hidden');
 }
-
+if(stream){
+stopLive();
+}
+}
+} catch (error) {
+console.error('Auth state error:', error);
+alert('Something went wrong: ' + error.message);
+// Reset to safe logged-out state
+currentUser = null;
+currentRole = null;
+document.getElementById('loggedOut').classList.remove('hidden');
+document.getElementById('loggedIn').classList.add('hidden');
+updateSellerUI();
+showPage('home');
+}
 });
 
+// ---------- PRODUCT FUNCTIONS ----------
 async function loadProducts(){
-
-const snapshot=await db.collection('products').get();
-
-window.products=[];
-
-snapshot.forEach(doc=>{
-
-window.products.push({
-id:doc.id,
-...doc.data()
+try{
+const snapshot = await db.collection('products').orderBy('createdAt', 'desc').get();
+window.products = [];
+snapshot.forEach(doc => {
+window.products.push({ id: doc.id, ...doc.data() });
 });
-
-});
-
 renderProducts();
-
+} catch(e){
+console.error(e);
+}
 }
 
 function renderProducts(){
-
-const container=document.getElementById('productsContainer');
-
-const search=document.getElementById('searchInput').value.toLowerCase();
-
-const filtered=window.products.filter(p=>p.name.toLowerCase().includes(search));
-
-if(filtered.length===0){
-
-container.innerHTML='<p class="text-white">No products found</p>';
-
+const container = document.getElementById('productsContainer');
+if(!container) return;
+const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
+const filtered = window.products.filter(p => p.name?.toLowerCase().includes(searchTerm));
+if(filtered.length === 0){
+container.innerHTML = `<div class="col-span-full text-center py-12 bg-white/50 rounded-2xl"><i class="fas fa-box-open text-4xl text-gray-400 mb-2"></i><p class="text-gray-500">✨ No products found</p></div>`;
 return;
-
+}
+container.innerHTML = filtered.map(product => `
+<div class="product-card p-4 bg-white">
+<img src="${product.image || 'https://via.placeholder.com/300?text=Product'}" class="w-full h-48 object-cover rounded-xl mb-3" alt="${product.name}" onerror="this.src='https://via.placeholder.com/300?text=No+Image'">
+<h3 class="font-bold text-lg truncate">${escapeHtml(product.name)}</h3>
+<p class="text-gray-500 text-sm line-clamp-2">${escapeHtml(product.description || '')}</p>
+<div class="flex justify-between items-center mt-3">
+<span class="text-purple-700 font-bold text-xl">KES ${Number(product.price).toLocaleString()}</span>
+<span class="bg-gray-100 text-xs px-2 py-1 rounded-full">${escapeHtml(product.seller || 'Seller')}</span>
+</div>
+</div>
+`).join('');
 }
 
-container.innerHTML=filtered.map(product=>`
-
-<div class="product-card p-4">
-
-<img src="${product.image}" class="w-full h-48 object-cover rounded-lg mb-3">
-
-<h3 class="font-bold text-lg">${product.name}</h3>
-
-<p class="text-gray-500">${product.description}</p>
-
-<div class="flex justify-between items-center mt-3">
-
-<span class="text-purple-600 font-bold">
-KES ${product.price}
-</span>
-
-</div>
-
-</div>
-
-`).join('');
-
+function escapeHtml(str){
+if(!str) return '';
+return str.replace(/[&<>]/g, function(m){
+if(m === '&') return '&amp;';
+if(m === '<') return '&lt;';
+if(m === '>') return '&gt;';
+return m;
+});
 }
 
 async function addProduct(){
-
-const name=prompt('Product Name');
-
-const description=prompt('Description');
-
-const price=prompt('Price');
-
-const image=prompt('Image URL');
-
-if(!name || !price) return;
-
+if(currentRole !== 'seller'){
+alert('Only sellers can add products');
+return;
+}
+const name = prompt('Product name:');
+if(!name) return;
+const description = prompt('Short description:');
+const price = prompt('Price (KES):');
+if(!price || isNaN(price)) return alert('Valid price required');
+const image = prompt('Image URL (optional):', 'https://picsum.photos/id/20/300/200');
+try{
 await db.collection('products').add({
-name,
-description,
-price,
-image,
-seller:currentUser.store_name,
-sellerId:auth.currentUser.uid
+name: name.trim(),
+description: description || '',
+price: Number(price),
+image: image || 'https://picsum.photos/id/26/300/200',
+seller: currentUser?.store_name || 'Seller',
+sellerId: auth.currentUser.uid,
+createdAt: firebase.firestore.FieldValue.serverTimestamp()
 });
-
-toast('Product Added');
-
+toast('✅ Product added!');
 loadProducts();
-
 loadSellerProducts();
-
+} catch(err){
+alert('Error: '+err.message);
+}
 }
 
 async function loadSellerProducts(){
-
-const snapshot=await db.collection('products')
-.where('sellerId','==',auth.currentUser.uid)
-.get();
-
-const container=document.getElementById('myProducts');
-
-container.innerHTML='';
-
-snapshot.forEach(doc=>{
-
-const product=doc.data();
-
-container.innerHTML+=`
-
-<div class="bg-gray-100 p-3 rounded-lg flex justify-between">
-
+if(!auth.currentUser) return;
+const container = document.getElementById('myProducts');
+if(!container) return;
+const snapshot = await db.collection('products').where('sellerId', '==', auth.currentUser.uid).get();
+if(snapshot.empty){
+container.innerHTML = '<div class="text-center text-gray-400 py-4">No products yet. Click + to add</div>';
+return;
+}
+container.innerHTML = '';
+snapshot.forEach(doc => {
+const prod = doc.data();
+container.innerHTML += `
+<div class="bg-white p-4 rounded-xl shadow-sm flex justify-between items-center border border-gray-100">
 <div>
-<p class="font-bold">${product.name}</p>
-<p>KES ${product.price}</p>
+<p class="font-bold">${escapeHtml(prod.name)}</p>
+<p class="text-purple-600 font-semibold">KES ${Number(prod.price).toLocaleString()}</p>
 </div>
-
-<button onclick="deleteProduct('${doc.id}')" class="text-red-600">
-<i class="fas fa-trash"></i>
+<button onclick="deleteProduct('${doc.id}')" class="text-red-500 hover:text-red-700 bg-red-50 p-2 rounded-full transition">
+<i class="fas fa-trash-alt"></i>
 </button>
-
 </div>
-
 `;
-
 });
-
 }
 
-async function deleteProduct(id){
-
-await db.collection('products').doc(id).delete();
-
-toast('Product Deleted');
-
+async function deleteProduct(productId){
+if(confirm('Delete this product?')){
+await db.collection('products').doc(productId).delete();
+toast('🗑️ Product removed');
 loadProducts();
-
 loadSellerProducts();
-
+}
 }
 
 function openMarket(){
-
 showPage('market');
-
 loadProducts();
-
 }
 
 function openLive(){
-
-if(currentRole!=='seller'){
-
-alert('Only sellers can access live studio');
-
+if(currentRole !== 'seller'){
+alert('Only verified sellers can access Live Studio 🎥');
 showPage('profile');
-
 return;
-
 }
-
 showPage('live');
-
 document.getElementById('liveAuthRequired').classList.add('hidden');
-
 document.getElementById('liveStudio').classList.remove('hidden');
-
 }
 
+// ---------- LIVE STREAMING ----------
 async function startLive(){
-
 try{
-
-stream=await navigator.mediaDevices.getUserMedia({
-video:{
-facingMode:currentCamera
-},
-audio:true
+stream = await navigator.mediaDevices.getUserMedia({
+video: { facingMode: currentCamera },
+audio: true
 });
-
-document.getElementById('video').srcObject=stream;
-
-document.getElementById('liveStatus').innerText='🔴 LIVE NOW';
-
-document.getElementById('startBtn').classList.add('hidden');
-
-document.getElementById('stopBtn').classList.remove('hidden');
-
-toast('Live Started');
-
-}catch(error){
-
-alert('Camera permission denied');
-
+const videoElem = document.getElementById('video');
+if(videoElem) videoElem.srcObject = stream;
+document.getElementById('liveStatus').innerHTML = '🔴 LIVE NOW';
+document.getElementById('liveStatus').classList.add('bg-red-100', 'text-red-700');
+document.getElementById('startBtn')?.classList.add('hidden');
+document.getElementById('stopBtn')?.classList.remove('hidden');
+toast('🎥 Live broadcast started');
+} catch(err){
+alert('Camera access denied. Please allow permissions.');
+console.error(err);
 }
-
 }
 
 function stopLive(){
-
 if(stream){
-
-stream.getTracks().forEach(track=>track.stop());
-
+stream.getTracks().forEach(track => track.stop());
+stream = null;
 }
-
-document.getElementById('video').srcObject=null;
-
-document.getElementById('liveStatus').innerText='⚫ Offline';
-
-document.getElementById('startBtn').classList.remove('hidden');
-
-document.getElementById('stopBtn').classList.add('hidden');
-
-toast('Live Ended');
-
+const videoElem = document.getElementById('video');
+if(videoElem) videoElem.srcObject = null;
+document.getElementById('liveStatus').innerHTML = '⚫ Offline';
+document.getElementById('liveStatus').classList.remove('bg-red-100', 'text-red-700');
+document.getElementById('startBtn')?.classList.remove('hidden');
+document.getElementById('stopBtn')?.classList.add('hidden');
+toast('Live stream ended');
 }
 
 async function switchCamera(){
-
-currentCamera=currentCamera==='user' ? 'environment' : 'user';
-
+currentCamera = currentCamera === 'user' ? 'environment' : 'user';
 if(stream){
-
 stopLive();
-
 await startLive();
-
+}
+toast(currentCamera === 'user' ? '📸 Front camera' : '📷 Back camera');
 }
 
-toast(currentCamera==='user' ? 'Front Camera' : 'Back Camera');
+// global helper to protect console & right-click (optional)
+document.addEventListener('contextmenu', (e) => e.preventDefault());
 
-}
-
-document.addEventListener('contextmenu',(e)=>{
-e.preventDefault();
-});
-
+// ensure products are loaded when marketplace opens
+window.products = [];
+loadProducts();
 </script>
 
 </body>
