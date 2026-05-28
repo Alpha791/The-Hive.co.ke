@@ -498,6 +498,9 @@
         
         // ------------------------- EVENT LISTENERS & INIT -------------------------
         document.addEventListener('DOMContentLoaded', () => {
+            // Disable right-click (context menu) on the entire page
+            document.addEventListener('contextmenu', (e) => e.preventDefault());
+            
             // Navigation
             document.getElementById('homeBtn').addEventListener('click', () => showPage('home'));
             document.getElementById('marketBtn').addEventListener('click', () => { showPage('market'); loadProducts(); });
