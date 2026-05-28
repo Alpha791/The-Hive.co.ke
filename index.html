@@ -316,10 +316,13 @@ auth.onAuthStateChanged(async (user) => {
 // Product functions
 async function loadProducts() {
     try {
-        const snap = await db.collection('products').orderBy('createdAt', 'desc').get();
-        window.products = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const snapshot = await db.collection('products').orderBy('createdAt', 'desc').get();
+        window.products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderProducts();
-    } catch(e) { console.error(e); }
+    } catch (e) {
+        console.warn("Products not accessible yet:", e);
+        // Don't show error to user – just keep empty marketplace
+    }
 }
 function renderProducts() {
     const container = document.getElementById('productsContainer');
